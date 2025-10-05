@@ -1,40 +1,26 @@
 import { plainToInstance } from 'class-transformer';
-import {
-  IsEnum,
-  IsNumber,
-  IsString,
-  validateSync,
-  IsOptional,
-} from 'class-validator';
-
-enum Environment {
-  Development = 'development',
-  Production = 'production',
-  Test = 'test',
-}
+import { IsString, IsOptional, validateSync } from 'class-validator';
 
 class EnvironmentVariables {
-  @IsEnum(Environment)
+  @IsString()
   @IsOptional()
-  NODE_ENV: Environment = Environment.Development;
+  NODE_ENV?: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  PORT: number = 3000;
+  PORT?: string;
 
-  // DATABASE_URL (для Railway/Render/Heroku)
   @IsString()
   @IsOptional()
   DATABASE_URL?: string;
 
-  // ИЛИ отдельные переменные (для локальной разработки)
   @IsString()
   @IsOptional()
   DB_HOST?: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  DB_PORT?: number;
+  DB_PORT?: string;
 
   @IsString()
   @IsOptional()
@@ -48,28 +34,29 @@ class EnvironmentVariables {
   @IsOptional()
   DB_NAME?: string;
 
-  // JWT обязательны
   @IsString()
-  JWT_SECRET!: string;
-
-  @IsString()
-  JWT_REFRESH_SECRET!: string;
+  @IsOptional()
+  JWT_SECRET?: string;
 
   @IsString()
   @IsOptional()
-  JWT_EXPIRES_IN: string = '15m';
+  JWT_REFRESH_SECRET?: string;
 
   @IsString()
   @IsOptional()
-  JWT_REFRESH_EXPIRES_IN: string = '7d';
+  JWT_EXPIRES_IN?: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  THROTTLE_TTL: number = 60;
+  JWT_REFRESH_EXPIRES_IN?: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  THROTTLE_LIMIT: number = 10;
+  THROTTLE_TTL?: string;
+
+  @IsString()
+  @IsOptional()
+  THROTTLE_LIMIT?: string;
 }
 
 export function validate(config: Record<string, unknown>) {
@@ -78,25 +65,11 @@ export function validate(config: Record<string, unknown>) {
   });
 
   const errors = validateSync(validatedConfig, {
-    skipMissingProperties: false,
+    skipMissingProperties: true,
   });
 
   if (errors.length > 0) {
     throw new Error(errors.toString());
-  }
-
-  // Проверка: должен быть или DATABASE_URL, или все DB_* переменные
-  if (!validatedConfig.DATABASE_URL) {
-    const requiredDbVars = ['DB_HOST', 'DB_USERNAME', 'DB_PASSWORD', 'DB_NAME'];
-    const missingVars = requiredDbVars.filter(
-      (varName) => !validatedConfig[varName as keyof EnvironmentVariables],
-    );
-
-    if (missingVars.length > 0) {
-      throw new Error(
-        `Either DATABASE_URL or all of [${requiredDbVars.join(', ')}] must be provided. Missing: ${missingVars.join(', ')}`,
-      );
-    }
   }
 
   return validatedConfig;
