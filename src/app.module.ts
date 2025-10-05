@@ -13,6 +13,7 @@ import { User } from './users/entities/user.entity';
 import { validationSchema } from './config/validation.schema';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { validate } from './config/env.validation';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { APP_GUARD } from '@nestjs/core';
         '.env.local', // Локальные переопределения
         '.env',
       ], // Базовый (самый низкий),
+      validate,
       validationSchema: validationSchema,
       validationOptions: {
         allowUnknown: true, // Разрешить неизвестные переменные (например, системные)
