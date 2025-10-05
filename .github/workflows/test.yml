@@ -26,18 +26,23 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
       
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
       
-      - run: npm run lint
+      - name: Run linter
+        run: npm run lint
       
-      - run: npm run test
+      - name: Run unit tests
+        run: npm run test
         env:
           DB_HOST: localhost
           DB_PORT: 5432
@@ -46,3 +51,5 @@ jobs:
           DB_NAME: nest_test
           JWT_SECRET: test_secret_min_32_chars_long_123456
           NODE_ENV: test
+          THROTTLE_TTL: 60
+          THROTTLE_LIMIT: 1000
