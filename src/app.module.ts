@@ -25,7 +25,6 @@ import { validate } from './config/env.validation';
         '.env.local', // Локальные переопределения
         '.env',
       ], // Базовый (самый низкий),
-      validate,
       validationSchema: validationSchema,
       validationOptions: {
         allowUnknown: true, // Разрешить неизвестные переменные (например, системные)
