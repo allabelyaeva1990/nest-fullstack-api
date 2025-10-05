@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nest-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: nest_fullstack
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nest-app
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # ✅ Явно указываем все переменные
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USERNAME: postgres
+      DB_PASSWORD: mysecretpassword
+      DB_NAME: nest_fullstack
+      JWT_SECRET: ${JWT_SECRET:-docker_secret_min_32_chars_long_1234567890abc}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-docker_refresh_secret_32_chars_890abcdef}
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      THROTTLE_TTL: "60"
+      THROTTLE_LIMIT: "10"
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
